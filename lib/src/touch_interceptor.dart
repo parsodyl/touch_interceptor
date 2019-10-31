@@ -1,12 +1,24 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// A widget that intercepts pointer events and send them
-/// to [TouchConsumer] widgets placed underneath.
+/// A widget that intercepts pointer events and send them to every
+/// [TouchConsumer] widget placed underneath.
 ///
+/// ## Layout behavior
+///
+/// _See [BoxConstraints] for an introduction to box layout models._
+///
+/// If it has a child, this widget defers to the child for sizing behavior. If
+/// it does not have a child, it grows to fit the parent instead.
 class TouchInterceptor extends StatefulWidget {
+  /// The [child] contained by the interceptor.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
+  /// Creates a [TouchInterceptor] widget.
   const TouchInterceptor({Key key, this.child}) : super(key: key);
 
   @override
@@ -35,6 +47,13 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
   void _sendAction(_TouchAction ta, Offset o) {
     _keySet.forEach((TouchKey k) => k.currentState.dispatchTouch(o, ta));
   }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    final List<String> keys = _keySet.map((k) => k.toString()).toList();
+    properties.add(IterableProperty<String>('keys', keys, ifEmpty: '<none>'));
+  }
 }
 
 enum _TouchAction { down, move, up }
@@ -44,7 +63,8 @@ class _KeyRegister extends InheritedWidget {
     Key key,
     @required Set<TouchKey> keySet,
     Widget child,
-  })  : _keySet = keySet,
+  })  : assert(keySet != null),
+        _keySet = keySet,
         super(key: key, child: child);
 
   final Set<TouchKey> _keySet;
@@ -83,11 +103,30 @@ class _KeyRegister extends InheritedWidget {
       context.inheritFromWidgetOfExactType(_KeyRegister);
 }
 
+/// A widget that listen for events from the nearest [TouchInterceptor]
+/// ancestor and calls callbacks in response to them.
+///
+/// ...
 class TouchReceiver extends StatefulWidget {
+  /// Called when a pointer comes into contact with the screen at this widget's
+  /// location.
   final VoidCallback onTouchDown;
+
+  /// Called when a pointer that has previously come into contact with the screen
+  /// changes position and reaches this widget's location.
   final VoidCallback onTouchEnter;
+
+  /// Called when a pointer that has previously come into contact with the screen
+  /// changes position and leaves this widget's location.
   final VoidCallback onTouchExit;
+
+  /// Called when a pointer that has previously come into contact with the screen
+  /// stops being in contact with the screen at this widget's location.
   final VoidCallback onTouchUp;
+
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
   final Widget child;
 
   const TouchReceiver({
@@ -229,7 +268,7 @@ class TouchKey extends GlobalKey<_TouchReceiverCoreState> {
 
   @override
   String toString() {
-    return '[TouchKey<$hashCode>]';
+    return '[TK<$hashCode>]';
   }
 }
 
