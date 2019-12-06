@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -13,31 +12,31 @@ import 'package:flutter/widgets.dart';
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 class TouchInterceptor extends StatefulWidget {
+  /// Creates a [TouchInterceptor] widget.
+  const TouchInterceptor({Key key, this.child}) : super(key: key);
+
   /// The [child] contained by the interceptor.
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
-
-  /// Creates a [TouchInterceptor] widget.
-  const TouchInterceptor({Key key, this.child}) : super(key: key);
 
   @override
   _TouchInterceptorState createState() => _TouchInterceptorState();
 }
 
 class _TouchInterceptorState extends State<TouchInterceptor> {
-  final _keySet = Set<TouchKey>();
+  final _keySet = <TouchKey>{};
 
   @override
   Widget build(BuildContext context) {
     return _KeyRegister(
       keySet: _keySet,
       child: Listener(
-        onPointerDown: (details) =>
+        onPointerDown: (PointerDownEvent details) =>
             _sendAction(_TouchAction.down, details.position),
-        onPointerMove: (details) =>
+        onPointerMove: (PointerMoveEvent details) =>
             _sendAction(_TouchAction.move, details.position),
-        onPointerUp: (details) =>
+        onPointerUp: (PointerUpEvent details) =>
             _sendAction(_TouchAction.up, details.position),
         child: AbsorbPointer(child: widget.child),
       ),
@@ -45,14 +44,17 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
   }
 
   void _sendAction(_TouchAction ta, Offset o) {
-    _keySet.forEach((TouchKey k) => k.currentState.dispatchTouch(o, ta));
+    for (TouchKey key in _keySet) {
+      key.currentState.dispatchTouch(o, ta);
+    }
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final List<String> keys = _keySet.map((k) => k.toString()).toList();
-    properties.add(IterableProperty<String>('keys', keys, ifEmpty: '<none>'));
+    properties.add(IterableProperty<String>(
+        'keys', _keySet.map((TouchKey key) => key.toString()).toList(),
+        ifEmpty: '<none>'));
   }
 }
 
@@ -86,17 +88,17 @@ class _KeyRegister extends InheritedWidget {
   TouchKey _generateKey() {
     const tries = 3;
     for (var t = 0; t < tries; t++) {
-      final newKey = TouchKey();
+      const newKey = TouchKey();
       if (_keySet.add(newKey)) {
         return newKey;
       }
     }
-    throw "Error in generating a new TouchKey";
+    throw 'Error in generating a new TouchKey';
   }
 
   @override
   bool updateShouldNotify(_KeyRegister oldWidget) {
-    return this._keySet != oldWidget._keySet;
+    return _keySet != oldWidget._keySet;
   }
 
   static _KeyRegister of(BuildContext context) =>
@@ -108,6 +110,15 @@ class _KeyRegister extends InheritedWidget {
 ///
 /// ...
 class TouchReceiver extends StatefulWidget {
+  /// ...
+  const TouchReceiver({
+    this.onTouchDown,
+    this.onTouchEnter,
+    this.onTouchExit,
+    this.onTouchUp,
+    this.child,
+  });
+
   /// Called when a pointer comes into contact with the screen at this widget's
   /// location.
   final VoidCallback onTouchDown;
@@ -128,14 +139,6 @@ class TouchReceiver extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
-
-  const TouchReceiver({
-    this.onTouchDown,
-    this.onTouchEnter,
-    this.onTouchExit,
-    this.onTouchUp,
-    this.child,
-  });
 
   @override
   _TouchReceiverState createState() => _TouchReceiverState();
@@ -161,14 +164,14 @@ class _TouchReceiverState extends State<TouchReceiver> {
   @override
   Widget build(BuildContext context) {
     if (!_checkKey()) {
-      throw "Key unregistered!";
+      throw 'Key unregistered!';
     }
-    final cbs = _TouchCallbacks(widget.onTouchDown, widget.onTouchEnter,
+    final callbacks = _TouchCallbacks(widget.onTouchDown, widget.onTouchEnter,
         widget.onTouchExit, widget.onTouchUp);
     return _TouchReceiverCore(
       key: _key,
       child: widget.child,
-      callbacks: cbs,
+      callbacks: callbacks,
     );
   }
 
@@ -195,14 +198,14 @@ class _TouchReceiverState extends State<TouchReceiver> {
 }
 
 class _TouchReceiverCore extends StatefulWidget {
-  final _TouchCallbacks callbacks;
-  final Widget child;
-
   const _TouchReceiverCore({
     TouchKey key,
     this.callbacks,
     this.child,
   }) : super(key: key);
+
+  final _TouchCallbacks callbacks;
+  final Widget child;
 
   @override
   _TouchReceiverCoreState createState() => _TouchReceiverCoreState();
@@ -264,7 +267,7 @@ class _TouchReceiverCoreState extends State<_TouchReceiverCore> {
 }
 
 class TouchKey extends GlobalKey<_TouchReceiverCoreState> {
-  TouchKey() : super.constructor();
+  const TouchKey() : super.constructor();
 
   @override
   String toString() {
@@ -274,13 +277,13 @@ class TouchKey extends GlobalKey<_TouchReceiverCoreState> {
 
 @immutable
 class _TouchCallbacks {
+  const _TouchCallbacks(this._onTouchDown, this._onTouchEnter,
+      this._onTouchExit, this._onTouchUp);
+
   final VoidCallback _onTouchDown;
   final VoidCallback _onTouchEnter;
   final VoidCallback _onTouchExit;
   final VoidCallback _onTouchUp;
-
-  _TouchCallbacks(this._onTouchDown, this._onTouchEnter, this._onTouchExit,
-      this._onTouchUp);
 
   void down() => _safeCall(_onTouchDown);
 
@@ -301,6 +304,6 @@ class TouchInterceptorNotFoundError extends Error {
 
   @override
   String toString() {
-    return "Error: Could not find a TouchInterceptor widget above this TouchConsumer widget.";
+    return 'Error: Could not find a TouchInterceptor widget above this TouchConsumer widget.';
   }
 }
