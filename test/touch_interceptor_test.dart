@@ -7,7 +7,7 @@ void main() {
     const child = Placeholder();
     await tester.pumpWidget(const TouchInterceptor(
       key: Key('__ti__'),
-      child: TouchReceiver(child: child),
+      child: TouchConsumer(child: child),
     ));
     final rl = tester.allStates;
     rl.forEach(print);

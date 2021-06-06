@@ -61,10 +61,15 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
 /// A widget that listen for events from the nearest [TouchInterceptor]
 /// ancestor and calls callbacks in response to them.
 ///
-/// ...
-class TouchReceiver extends StatefulWidget {
-  /// ...
-  const TouchReceiver({
+/// ## Layout behavior
+///
+/// _See [BoxConstraints] for an introduction to box layout models._
+///
+/// If it has a child, this widget defers to the child for sizing behavior. If
+/// it does not have a child, it grows to fit the parent instead.
+class TouchConsumer extends StatefulWidget {
+  // Creates a [TouchConsumer] widget.
+  const TouchConsumer({
     this.onTouchDown,
     this.onTouchEnter,
     this.onTouchExit,
@@ -94,10 +99,10 @@ class TouchReceiver extends StatefulWidget {
   final Widget child;
 
   @override
-  _TouchReceiverState createState() => _TouchReceiverState();
+  _TouchConsumerState createState() => _TouchConsumerState();
 }
 
-class _TouchReceiverState extends State<TouchReceiver> {
+class _TouchConsumerState extends State<TouchConsumer> {
   TouchKey _key;
 
   @override
@@ -121,7 +126,7 @@ class _TouchReceiverState extends State<TouchReceiver> {
     }
     final callbacks = _TouchCallbacks(widget.onTouchDown, widget.onTouchEnter,
         widget.onTouchExit, widget.onTouchUp);
-    return _TouchReceiverCore(
+    return _TouchConsumerCore(
       key: _key,
       child: widget.child,
       callbacks: callbacks,
@@ -194,11 +199,11 @@ class _KeyRegister extends InheritedWidget {
   }
 
   static _KeyRegister of(BuildContext context) =>
-      context.inheritFromWidgetOfExactType(_KeyRegister);
+      context.dependOnInheritedWidgetOfExactType<_KeyRegister>();
 }
 
-class _TouchReceiverCore extends StatefulWidget {
-  const _TouchReceiverCore({
+class _TouchConsumerCore extends StatefulWidget {
+  const _TouchConsumerCore({
     TouchKey key,
     this.callbacks,
     this.child,
@@ -208,10 +213,10 @@ class _TouchReceiverCore extends StatefulWidget {
   final Widget child;
 
   @override
-  _TouchReceiverCoreState createState() => _TouchReceiverCoreState();
+  _TouchConsumerCoreState createState() => _TouchConsumerCoreState();
 }
 
-class _TouchReceiverCoreState extends State<_TouchReceiverCore> {
+class _TouchConsumerCoreState extends State<_TouchConsumerCore> {
   bool _hasTouchEntered = false;
 
   @override
@@ -266,7 +271,7 @@ class _TouchReceiverCoreState extends State<_TouchReceiverCore> {
   }
 }
 
-class TouchKey extends GlobalKey<_TouchReceiverCoreState> {
+class TouchKey extends GlobalKey<_TouchConsumerCoreState> {
   const TouchKey() : super.constructor();
 
   @override
