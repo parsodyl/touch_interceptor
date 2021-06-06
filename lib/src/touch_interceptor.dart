@@ -58,53 +58,6 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
   }
 }
 
-enum _TouchAction { down, move, up }
-
-class _KeyRegister extends InheritedWidget {
-  const _KeyRegister({
-    Key key,
-    @required Set<TouchKey> keySet,
-    Widget child,
-  })  : assert(keySet != null),
-        _keySet = keySet,
-        super(key: key, child: child);
-
-  final Set<TouchKey> _keySet;
-
-  TouchKey registerNewKey() {
-    return _generateKey();
-  }
-
-  bool isKeyRegistered(TouchKey key) {
-    return _keySet.contains(key);
-  }
-
-  void unregisterKey(TouchKey key) {
-    _keySet.remove(key);
-  }
-
-  List<TouchKey> get keys => _keySet.toList(growable: false);
-
-  TouchKey _generateKey() {
-    const tries = 3;
-    for (var t = 0; t < tries; t++) {
-      const newKey = TouchKey();
-      if (_keySet.add(newKey)) {
-        return newKey;
-      }
-    }
-    throw 'Error in generating a new TouchKey';
-  }
-
-  @override
-  bool updateShouldNotify(_KeyRegister oldWidget) {
-    return _keySet != oldWidget._keySet;
-  }
-
-  static _KeyRegister of(BuildContext context) =>
-      context.inheritFromWidgetOfExactType(_KeyRegister);
-}
-
 /// A widget that listen for events from the nearest [TouchInterceptor]
 /// ancestor and calls callbacks in response to them.
 ///
@@ -195,6 +148,53 @@ class _TouchReceiverState extends State<TouchReceiver> {
     }
     return kr;
   }
+}
+
+enum _TouchAction { down, move, up }
+
+class _KeyRegister extends InheritedWidget {
+  const _KeyRegister({
+    Key key,
+    @required Set<TouchKey> keySet,
+    Widget child,
+  })  : assert(keySet != null),
+        _keySet = keySet,
+        super(key: key, child: child);
+
+  final Set<TouchKey> _keySet;
+
+  TouchKey registerNewKey() {
+    return _generateKey();
+  }
+
+  bool isKeyRegistered(TouchKey key) {
+    return _keySet.contains(key);
+  }
+
+  void unregisterKey(TouchKey key) {
+    _keySet.remove(key);
+  }
+
+  List<TouchKey> get keys => _keySet.toList(growable: false);
+
+  TouchKey _generateKey() {
+    const tries = 3;
+    for (var t = 0; t < tries; t++) {
+      const newKey = TouchKey();
+      if (_keySet.add(newKey)) {
+        return newKey;
+      }
+    }
+    throw 'Error in generating a new TouchKey';
+  }
+
+  @override
+  bool updateShouldNotify(_KeyRegister oldWidget) {
+    return _keySet != oldWidget._keySet;
+  }
+
+  static _KeyRegister of(BuildContext context) =>
+      context.inheritFromWidgetOfExactType(_KeyRegister);
 }
 
 class _TouchReceiverCore extends StatefulWidget {
