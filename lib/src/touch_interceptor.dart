@@ -3,7 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 /// A widget that intercepts pointer events and send them to every
-/// [TouchConsumer] widget placed underneath.
+/// [TouchConsumer] widget placed underneath on the z axy.
 ///
 /// ## Layout behavior
 ///
@@ -58,7 +58,7 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
   }
 }
 
-/// A widget that listen for events from the nearest [TouchInterceptor]
+/// A widget that listens for events from the nearest [TouchInterceptor]
 /// ancestor and calls callbacks in response to them.
 ///
 /// ## Layout behavior

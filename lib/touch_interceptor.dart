@@ -1,4 +1,4 @@
-/// A widget that intercept touch events and send them to other widgets
+/// A widget that intercepts touch events and sends them to other widgets
 /// underneath.
 library touch_interceptor;
 
