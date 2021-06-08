@@ -1,7 +1,6 @@
 name: touch_interceptor
 description: A widget that intercept touch events and send them to other widgets underneath.
 version: 0.0.1
-author: Daniele Paradiso <parsodyl@gmail.com>
 homepage: https://github.com/parsodyl/touch_interceptor
 
 environment:
