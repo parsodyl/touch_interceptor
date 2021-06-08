@@ -169,7 +169,11 @@ class _KeyRegister extends InheritedWidget {
   final Set<TouchKey> _keySet;
 
   TouchKey registerNewKey() {
-    return _generateKey();
+    final newKey = TouchKey();
+    if (_keySet.add(newKey)) {
+      return newKey;
+    }
+    return null;
   }
 
   bool isKeyRegistered(TouchKey key) {
@@ -181,17 +185,6 @@ class _KeyRegister extends InheritedWidget {
   }
 
   List<TouchKey> get keys => _keySet.toList(growable: false);
-
-  TouchKey _generateKey() {
-    const tries = 3;
-    for (var t = 0; t < tries; t++) {
-      const newKey = TouchKey();
-      if (_keySet.add(newKey)) {
-        return newKey;
-      }
-    }
-    throw 'Error in generating a new TouchKey';
-  }
 
   @override
   bool updateShouldNotify(_KeyRegister oldWidget) {
