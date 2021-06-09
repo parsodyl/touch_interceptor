@@ -4,12 +4,21 @@ import 'package:touch_interceptor/touch_interceptor.dart';
 
 void main() {
   testWidgets('adds one to input values', (tester) async {
-    const child = Placeholder();
-    await tester.pumpWidget(const TouchInterceptor(
-      key: Key('__ti__'),
-      child: TouchConsumer(child: child),
+    await tester.pumpWidget(TouchInterceptor(
+      key: const Key('__ti__'),
+      child: Column(
+        children: const [
+          TouchConsumer(child: Placeholder(fallbackHeight: 5)),
+          TouchConsumer(child: Placeholder(fallbackHeight: 5)),
+          TouchConsumer(child: Placeholder(fallbackHeight: 5)),
+          TouchConsumer(child: Placeholder(fallbackHeight: 5)),
+          TouchConsumer(child: Placeholder(fallbackHeight: 5)),
+        ],
+      ),
     ));
-    final rl = tester.allStates;
+    final fs = tester.firstState(find.byType(TouchInterceptor));
+    print(fs);
+    final rl = tester.stateList(find.byType(TouchConsumer));
     rl.forEach(print);
     //final keyFinder = find.byKey(Key('__ti__'));
     //expect(keyFinder, findsOneWidget);
@@ -19,7 +28,9 @@ void main() {
 
   testWidgets('TouchInterceptor is added to the tree', (tester) async {
     const touchInterceptor = TouchInterceptor();
-    await tester.pumpWidget(Container(child: touchInterceptor));
+    const testingWidget = TestingWidget(child: touchInterceptor);
+    // pump
+    await tester.pumpWidget(testingWidget);
     // check
     expect(find.byWidget(touchInterceptor), findsOneWidget);
   });
@@ -27,21 +38,40 @@ void main() {
   testWidgets('TouchInterceptor is removed from the tree', (tester) async {
     const touchInterceptor = TouchInterceptor();
     const testingWidget = TestingWidget(child: touchInterceptor);
+    // pump
     await tester.pumpWidget(testingWidget);
+    // check
     expect(find.byWidget(touchInterceptor), findsOneWidget);
+    // change state
     final ts =
         tester.firstState(find.byWidget(testingWidget)) as _TestingWidgetState;
     ts.childInserted = false;
     // pump again
     await tester.pump();
-    // check 2
+    // check again
     expect(find.byWidget(touchInterceptor), findsNothing);
+  });
+
+  testWidgets('A TouchConsumer is added underneath a TouchInterceptor.',
+      (tester) async {
+    const touchConsumer = TouchConsumer();
+    const touchInterceptor = TouchInterceptor(child: touchConsumer);
+    const testingWidget = TestingWidget(child: touchInterceptor);
+    // pump
+    await tester.pumpWidget(testingWidget);
+    // check
+    expect(find.byWidget(touchConsumer), findsOneWidget);
   });
 
   testWidgets('TouchInterceptor receives pointer events', (tester) async {
     const touchInterceptor = TouchInterceptor();
-    await tester.pumpWidget(Container(child: touchInterceptor));
+    const testingWidget = TestingWidget(child: touchInterceptor);
+    // pump
+    await tester.pumpWidget(testingWidget);
+    // tap the widget
     await tester.tap(find.byWidget(touchInterceptor));
+    // pump again
+    await tester.pumpWidget(testingWidget);
     // check
     expect(find.byWidget(touchInterceptor), findsOneWidget);
   });
