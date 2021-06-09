@@ -70,12 +70,13 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
 class TouchConsumer extends StatefulWidget {
   // Creates a [TouchConsumer] widget.
   const TouchConsumer({
+    Key key,
     this.onTouchDown,
     this.onTouchEnter,
     this.onTouchExit,
     this.onTouchUp,
     this.child,
-  });
+  }) : super(key: key);
 
   /// Called when a pointer comes into contact with the screen at this widget's
   /// location.
@@ -214,7 +215,7 @@ class _TouchConsumerCoreState extends State<_TouchConsumerCore> {
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return Container(child: widget.child);
   }
 
   void dispatchTouch(Offset touchPosition, _TouchAction action) {
