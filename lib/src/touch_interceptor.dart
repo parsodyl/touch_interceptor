@@ -13,12 +13,12 @@ import 'package:flutter/widgets.dart';
 /// it does not have a child, it grows to fit the parent instead.
 class TouchInterceptor extends StatefulWidget {
   /// Creates a [TouchInterceptor] widget.
-  const TouchInterceptor({Key key, this.child}) : super(key: key);
+  const TouchInterceptor({Key? key, this.child}) : super(key: key);
 
   /// The [child] contained by the interceptor.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   @override
   _TouchInterceptorState createState() => _TouchInterceptorState();
@@ -45,7 +45,7 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
 
   void _sendAction(_TouchAction ta, Offset o) {
     for (TouchKey key in _keySet) {
-      key.currentState.dispatchTouch(o, ta);
+      key.currentState!.dispatchTouch(o, ta);
     }
   }
 
@@ -70,7 +70,7 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
 class TouchConsumer extends StatefulWidget {
   // Creates a [TouchConsumer] widget.
   const TouchConsumer({
-    Key key,
+    Key? key,
     this.onTouchDown,
     this.onTouchEnter,
     this.onTouchExit,
@@ -80,31 +80,31 @@ class TouchConsumer extends StatefulWidget {
 
   /// Called when a pointer comes into contact with the screen at this widget's
   /// location.
-  final VoidCallback onTouchDown;
+  final VoidCallback? onTouchDown;
 
   /// Called when a pointer that has previously come into contact with the screen
   /// changes position and reaches this widget's location.
-  final VoidCallback onTouchEnter;
+  final VoidCallback? onTouchEnter;
 
   /// Called when a pointer that has previously come into contact with the screen
   /// changes position and leaves this widget's location.
-  final VoidCallback onTouchExit;
+  final VoidCallback? onTouchExit;
 
   /// Called when a pointer that has previously come into contact with the screen
   /// stops being in contact with the screen at this widget's location.
-  final VoidCallback onTouchUp;
+  final VoidCallback? onTouchUp;
 
   /// The widget below this widget in the tree.
   ///
   /// {@macro flutter.widgets.child}
-  final Widget child;
+  final Widget? child;
 
   @override
   _TouchConsumerState createState() => _TouchConsumerState();
 }
 
 class _TouchConsumerState extends State<TouchConsumer> {
-  TouchKey _key;
+  TouchKey? _key;
 
   @override
   void didChangeDependencies() {
@@ -160,16 +160,15 @@ enum _TouchAction { down, move, up }
 
 class _KeyRegister extends InheritedWidget {
   const _KeyRegister({
-    Key key,
-    @required Set<TouchKey> keySet,
-    Widget child,
-  })  : assert(keySet != null),
-        _keySet = keySet,
+    Key? key,
+    required Set<TouchKey> keySet,
+    required Widget child,
+  })  : _keySet = keySet,
         super(key: key, child: child);
 
   final Set<TouchKey> _keySet;
 
-  TouchKey registerNewKey() {
+  TouchKey? registerNewKey() {
     final newKey = TouchKey();
     if (_keySet.add(newKey)) {
       return newKey;
@@ -177,11 +176,11 @@ class _KeyRegister extends InheritedWidget {
     return null;
   }
 
-  bool isKeyRegistered(TouchKey key) {
+  bool isKeyRegistered(TouchKey? key) {
     return _keySet.contains(key);
   }
 
-  void unregisterKey(TouchKey key) {
+  void unregisterKey(TouchKey? key) {
     _keySet.remove(key);
   }
 
@@ -192,19 +191,19 @@ class _KeyRegister extends InheritedWidget {
     return _keySet != oldWidget._keySet;
   }
 
-  static _KeyRegister of(BuildContext context) =>
+  static _KeyRegister? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<_KeyRegister>();
 }
 
 class _TouchConsumerCore extends StatefulWidget {
   const _TouchConsumerCore({
-    TouchKey key,
-    this.callbacks,
-    this.child,
+    TouchKey? key,
+    required this.callbacks,
+    required this.child,
   }) : super(key: key);
 
   final _TouchCallbacks callbacks;
-  final Widget child;
+  final Widget? child;
 
   @override
   _TouchConsumerCoreState createState() => _TouchConsumerCoreState();
@@ -279,23 +278,19 @@ class _TouchCallbacks {
   const _TouchCallbacks(this._onTouchDown, this._onTouchEnter,
       this._onTouchExit, this._onTouchUp);
 
-  final VoidCallback _onTouchDown;
-  final VoidCallback _onTouchEnter;
-  final VoidCallback _onTouchExit;
-  final VoidCallback _onTouchUp;
+  final VoidCallback? _onTouchDown;
+  final VoidCallback? _onTouchEnter;
+  final VoidCallback? _onTouchExit;
+  final VoidCallback? _onTouchUp;
 
-  void down() => _safeCall(_onTouchDown);
+  void down() => _onTouchDown?.call();
 
-  void enter() => _safeCall(_onTouchEnter);
+  void enter() => _onTouchEnter?.call();
 
-  void exit() => _safeCall(_onTouchExit);
+  void exit() => _onTouchExit?.call();
 
-  void up() => _safeCall(_onTouchUp);
+  void up() => _onTouchUp?.call();
 
-  static void _safeCall(VoidCallback cb) {
-    void voidValue;
-    return (cb != null) ? cb() : voidValue;
-  }
 }
 
 class TouchInterceptorNotFoundError extends Error {

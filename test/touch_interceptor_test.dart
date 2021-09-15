@@ -78,9 +78,9 @@ void main() {
 }
 
 class TestingWidget extends StatefulWidget {
-  const TestingWidget({Key key, this.child}) : super(key: key);
+  const TestingWidget({Key? key, this.child}) : super(key: key);
 
-  final Widget child;
+  final Widget? child;
 
   @override
   _TestingWidgetState createState() => _TestingWidgetState();
