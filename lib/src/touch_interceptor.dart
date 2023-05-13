@@ -1,9 +1,10 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-/// A widget that intercepts pointer events and send them to every
-/// [TouchConsumer] widget placed underneath on the z axy.
+/// A widget that intercepts pointer events and sends them to every
+/// [TouchConsumer] widget placed underneath.
 ///
 /// ## Layout behavior
 ///
@@ -38,20 +39,23 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
             _sendAction(_TouchAction.move, details.position),
         onPointerUp: (PointerUpEvent details) =>
             _sendAction(_TouchAction.up, details.position),
+        onPointerCancel: (PointerCancelEvent details) =>
+            _sendAction(_TouchAction.cancel, details.position),
         child: AbsorbPointer(child: widget.child),
       ),
     );
   }
 
-  void _sendAction(_TouchAction ta, Offset o) {
+  void _sendAction(_TouchAction touchAction, Offset offset) {
     for (TouchKey key in _keySet) {
-      key.currentState!.dispatchTouch(o, ta);
+      key.currentState!.dispatchTouch(offset, touchAction);
     }
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+
     properties.add(IterableProperty<String>(
         'keys', _keySet.map((TouchKey key) => key.toString()).toList(),
         ifEmpty: '<none>'));
@@ -108,25 +112,28 @@ class _TouchConsumerState extends State<TouchConsumer> {
 
   @override
   void didChangeDependencies() {
-    if (!_checkKey()) {
+    super.didChangeDependencies();
+
+    if (!_isKeyRegistered) {
       _registerKey();
     }
-    super.didChangeDependencies();
   }
 
   @override
   void deactivate() {
     _unregisterKey();
+
     super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_checkKey()) {
-      throw 'Key unregistered!';
-    }
-    final callbacks = _TouchCallbacks(widget.onTouchDown, widget.onTouchEnter,
-        widget.onTouchExit, widget.onTouchUp);
+    final callbacks = _TouchCallbacks(
+      widget.onTouchDown,
+      widget.onTouchEnter,
+      widget.onTouchExit,
+      widget.onTouchUp,
+    );
     return _TouchConsumerCore(
       key: _key,
       child: widget.child,
@@ -134,7 +141,7 @@ class _TouchConsumerState extends State<TouchConsumer> {
     );
   }
 
-  bool _checkKey() {
+  bool get _isKeyRegistered {
     return _key != null && _getKeyRegister().isKeyRegistered(_key);
   }
 
@@ -156,7 +163,17 @@ class _TouchConsumerState extends State<TouchConsumer> {
   }
 }
 
-enum _TouchAction { down, move, up }
+/// Thrown when a TouchInterceptor is not found above in the widget tree.
+class TouchInterceptorNotFoundError extends Error {
+  TouchInterceptorNotFoundError._();
+
+  @override
+  String toString() {
+    return 'Error: Could not find a TouchInterceptor widget above this TouchConsumer widget.';
+  }
+}
+
+enum _TouchAction { down, move, up, cancel }
 
 class _KeyRegister extends InheritedWidget {
   const _KeyRegister({
@@ -169,7 +186,7 @@ class _KeyRegister extends InheritedWidget {
   final Set<TouchKey> _keySet;
 
   TouchKey? registerNewKey() {
-    final newKey = TouchKey();
+    final newKey = TouchKey(); // keep it final!
     if (_keySet.add(newKey)) {
       return newKey;
     }
@@ -245,6 +262,14 @@ class _TouchConsumerCoreState extends State<_TouchConsumerCore> {
             widget.callbacks.up();
           }
           break;
+        case _TouchAction.cancel:
+          if (_hasTouchEntered) {
+            setState(() {
+              _hasTouchEntered = false;
+            });
+            widget.callbacks.exit();
+          }
+          break;
       }
     } else {
       if (_hasTouchEntered) {
@@ -275,8 +300,12 @@ class TouchKey extends GlobalKey<_TouchConsumerCoreState> {
 
 @immutable
 class _TouchCallbacks {
-  const _TouchCallbacks(this._onTouchDown, this._onTouchEnter,
-      this._onTouchExit, this._onTouchUp);
+  const _TouchCallbacks(
+    this._onTouchDown,
+    this._onTouchEnter,
+    this._onTouchExit,
+    this._onTouchUp,
+  );
 
   final VoidCallback? _onTouchDown;
   final VoidCallback? _onTouchEnter;
@@ -290,14 +319,4 @@ class _TouchCallbacks {
   void exit() => _onTouchExit?.call();
 
   void up() => _onTouchUp?.call();
-
-}
-
-class TouchInterceptorNotFoundError extends Error {
-  TouchInterceptorNotFoundError._();
-
-  @override
-  String toString() {
-    return 'Error: Could not find a TouchInterceptor widget above this TouchConsumer widget.';
-  }
 }

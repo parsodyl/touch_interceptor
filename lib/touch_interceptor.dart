@@ -2,4 +2,5 @@
 /// underneath.
 library touch_interceptor;
 
-export 'src/touch_interceptor.dart';
+export 'src/touch_interceptor.dart'
+    show TouchInterceptor, TouchConsumer, TouchInterceptorNotFoundError;

@@ -14,3 +14,9 @@ doc/api/
 
 # IDEs
 .idea/
+
+# example native implementations
+/example/ios/
+/example/android/
+/example/web/
+/example/windows/
