@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -26,7 +25,7 @@ class TouchInterceptor extends StatefulWidget {
 }
 
 class _TouchInterceptorState extends State<TouchInterceptor> {
-  final _keySet = <TouchKey>{};
+  final _keySet = <_TouchKey>{};
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +46,7 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
   }
 
   void _sendAction(_TouchAction touchAction, Offset offset) {
-    for (TouchKey key in _keySet) {
+    for (_TouchKey key in _keySet) {
       key.currentState!.dispatchTouch(offset, touchAction);
     }
   }
@@ -57,7 +56,7 @@ class _TouchInterceptorState extends State<TouchInterceptor> {
     super.debugFillProperties(properties);
 
     properties.add(IterableProperty<String>(
-        'keys', _keySet.map((TouchKey key) => key.toString()).toList(),
+        'keys', _keySet.map((_TouchKey key) => key.toString()).toList(),
         ifEmpty: '<none>'));
   }
 }
@@ -108,7 +107,7 @@ class TouchConsumer extends StatefulWidget {
 }
 
 class _TouchConsumerState extends State<TouchConsumer> {
-  TouchKey? _key;
+  _TouchKey? _key;
 
   @override
   void didChangeDependencies() {
@@ -178,30 +177,30 @@ enum _TouchAction { down, move, up, cancel }
 class _KeyRegister extends InheritedWidget {
   const _KeyRegister({
     Key? key,
-    required Set<TouchKey> keySet,
+    required Set<_TouchKey> keySet,
     required Widget child,
   })  : _keySet = keySet,
         super(key: key, child: child);
 
-  final Set<TouchKey> _keySet;
+  final Set<_TouchKey> _keySet;
 
-  TouchKey? registerNewKey() {
-    final newKey = TouchKey(); // keep it final!
+  _TouchKey? registerNewKey() {
+    final newKey = _TouchKey(); // keep it final!
     if (_keySet.add(newKey)) {
       return newKey;
     }
     return null;
   }
 
-  bool isKeyRegistered(TouchKey? key) {
+  bool isKeyRegistered(_TouchKey? key) {
     return _keySet.contains(key);
   }
 
-  void unregisterKey(TouchKey? key) {
+  void unregisterKey(_TouchKey? key) {
     _keySet.remove(key);
   }
 
-  List<TouchKey> get keys => _keySet.toList(growable: false);
+  List<_TouchKey> get keys => _keySet.toList(growable: false);
 
   @override
   bool updateShouldNotify(_KeyRegister oldWidget) {
@@ -214,7 +213,7 @@ class _KeyRegister extends InheritedWidget {
 
 class _TouchConsumerCore extends StatefulWidget {
   const _TouchConsumerCore({
-    TouchKey? key,
+    _TouchKey? key,
     required this.callbacks,
     required this.child,
   }) : super(key: key);
@@ -289,8 +288,8 @@ class _TouchConsumerCoreState extends State<_TouchConsumerCore> {
   }
 }
 
-class TouchKey extends GlobalKey<_TouchConsumerCoreState> {
-  const TouchKey() : super.constructor();
+class _TouchKey extends GlobalKey<_TouchConsumerCoreState> {
+  const _TouchKey() : super.constructor();
 
   @override
   String toString() {
