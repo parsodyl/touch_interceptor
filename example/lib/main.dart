@@ -56,6 +56,7 @@ class _DemoViewState extends State<DemoView> {
                     TouchInterceptor(
                       child: DecoratedBox(
                         decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
                           border: Border.all(
                             color: _tiColor,
                             width: 4.0,
@@ -76,7 +77,7 @@ class _DemoViewState extends State<DemoView> {
                               ),
                               TouchConsumer(
                                 onTouchDown: () => setState(() {
-                                  _tcColor = CupertinoColors.activeGreen;
+                                  _tcColor = CupertinoColors.activeBlue;
                                   _lastEvent = 'down';
                                 }),
                                 onTouchUp: () => setState(() {

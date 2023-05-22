@@ -113,9 +113,7 @@ class _TouchConsumerState extends State<TouchConsumer> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    if (!_isKeyRegistered) {
-      _registerKey();
-    }
+    _registerKeyIfIsNot();
   }
 
   @override
@@ -140,25 +138,25 @@ class _TouchConsumerState extends State<TouchConsumer> {
     );
   }
 
-  bool get _isKeyRegistered {
-    return _key != null && _getKeyRegister().isKeyRegistered(_key);
-  }
-
-  void _registerKey() {
-    _key = _getKeyRegister().registerNewKey();
+  void _registerKeyIfIsNot() {
+    if (_key != null && _keyRegister.isKeyRegistered(_key)) {
+      return;
+    }
+    _key = _TouchKey(); // keep it final!
+    _keyRegister.registerNewKey(_key!);
   }
 
   void _unregisterKey() {
-    _getKeyRegister().unregisterKey(_key);
+    _keyRegister.unregisterKey(_key);
     _key = null;
   }
 
-  _KeyRegister _getKeyRegister() {
-    final kr = _KeyRegister.of(context);
-    if (kr == null) {
+  _KeyRegister get _keyRegister {
+    final keyRegister = _KeyRegister.of(context);
+    if (keyRegister == null) {
       throw TouchInterceptorNotFoundError._();
     }
-    return kr;
+    return keyRegister;
   }
 }
 
@@ -184,12 +182,8 @@ class _KeyRegister extends InheritedWidget {
 
   final Set<_TouchKey> _keySet;
 
-  _TouchKey? registerNewKey() {
-    final newKey = _TouchKey(); // keep it final!
-    if (_keySet.add(newKey)) {
-      return newKey;
-    }
-    return null;
+  void registerNewKey(_TouchKey newKey) {
+    _keySet.add(newKey);
   }
 
   bool isKeyRegistered(_TouchKey? key) {
@@ -213,7 +207,7 @@ class _KeyRegister extends InheritedWidget {
 
 class _TouchConsumerCore extends StatefulWidget {
   const _TouchConsumerCore({
-    _TouchKey? key,
+    required _TouchKey? key,
     required this.callbacks,
     required this.child,
   }) : super(key: key);
