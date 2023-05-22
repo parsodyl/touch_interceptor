@@ -39,4 +39,4 @@ TouchInterceptor(
 ### See the examples:
 - [Basic example](https://github.com/parsodyl/touch_interceptor/tree/master/example)
 - [Frozen layer](https://github.com/parsodyl/touch_interceptor_examples/tree/main/frozen_layer)
-- TBD: colorful pads
+- [Colorful pads](https://github.com/parsodyl/touch_interceptor_examples/tree/main/colorful_pads)
